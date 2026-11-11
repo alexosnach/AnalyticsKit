@@ -111,6 +111,18 @@ struct AnonymousUserIDProviderTests {
         #expect(id == hasher.hash(saved))
     }
 
+    /// The same form on every platform: `8fc10609-b5a6-4c45-a2a0-8b340468e611`.
+    @Test func savesTheIDAsALowercaseUUID() throws {
+        let store = InMemoryUserIDStore()
+
+        _ = AnonymousUserIDProvider(store: store, hasher: hasher).currentUserID()
+
+        let saved = try #require(store.saved)
+        #expect(UUID(uuidString: saved) != nil)
+        #expect(saved == saved.lowercased())
+        #expect(saved.count == 36)
+    }
+
     @Test func reusesTheSavedID() {
         let store = InMemoryUserIDStore(saved: "existing-id")
         let provider = AnonymousUserIDProvider(store: store, hasher: hasher)

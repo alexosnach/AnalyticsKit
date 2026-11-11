@@ -37,7 +37,8 @@ public struct AnonymousUserIDProvider: UserIDProvider {
         if let saved = store.load() {
             return saved
         }
-        let new = UUID().uuidString
+        // Always lowercase, the same form on every platform.
+        let new = UUID().uuidString.lowercased()
         store.save(new)
         return new
     }

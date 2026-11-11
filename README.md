@@ -106,7 +106,7 @@ Adding another analytics system = adding one more provider to the `CompositeAnal
 ## User ID
 
 - `HashedUserID` can only be created by an `IdentifierHasher`, so a raw ID can never reach analytics by mistake.
-- `AnonymousUserIDProvider` generates a random ID on first launch and keeps it in a `UserIDStore`.
+- `AnonymousUserIDProvider` generates a random ID on first launch (a lowercase UUID, the same form as in the Android library) and keeps it in a `UserIDStore`.
 - `KeychainUserIDStore` survives app reinstalls, is available after first unlock, and does not sync via iCloud. Keychain failures are reported to `onError` and never crash the app.
 - When your app gets accounts, replace the provider with one that hashes the backend ID — calling code stays the same.
 
