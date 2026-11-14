@@ -10,7 +10,7 @@ import Foundation
 ///
 /// Only a hasher in this file can create it: its `init` is `fileprivate`,
 /// so a raw ID can never be passed where a `HashedUserID` is expected.
-public struct HashedUserID: Equatable {
+public struct HashedUserID: Sendable, Hashable {
     public let value: String
 
     fileprivate init(value: String) {
@@ -19,7 +19,7 @@ public struct HashedUserID: Equatable {
 }
 
 /// Turns a raw identifier into the one analytics receives.
-public protocol IdentifierHasher {
+public protocol IdentifierHasher: Sendable {
     func hash(_ identifier: String) -> HashedUserID
 }
 

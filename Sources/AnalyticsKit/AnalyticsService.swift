@@ -9,12 +9,12 @@ import Foundation
 
 public typealias AnalyticsService = EventTracking & UserIdentification
 
-public protocol EventTracking {
+public protocol EventTracking: Sendable {
     func track(_ event: AnalyticsEvent)
 }
 
-public protocol UserIdentification {
+public protocol UserIdentification: Sendable {
     func setUserID(_ id: HashedUserID)
-    func setUserProperties(_ properties: [String: Any])
+    func setUserProperties(_ properties: AnalyticsParameters)
     func reset()
 }

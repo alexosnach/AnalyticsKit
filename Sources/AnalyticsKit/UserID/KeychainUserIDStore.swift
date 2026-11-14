@@ -23,12 +23,12 @@ import Security
 public struct KeychainUserIDStore: UserIDStore {
     private let service: String
     private let account: String
-    private let onError: (Failure) -> Void
+    private let onError: @Sendable (Failure) -> Void
 
     public init(
         service: String = Bundle.main.bundleIdentifier ?? "app",
         account: String = "analytics.user_id",
-        onError: @escaping (Failure) -> Void = { _ in }
+        onError: @escaping @Sendable (Failure) -> Void = { _ in }
     ) {
         self.service = service
         self.account = account

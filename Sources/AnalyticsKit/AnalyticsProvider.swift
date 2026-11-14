@@ -13,9 +13,9 @@ import Foundation
 ///
 /// An implementation adapts these calls to its SDK: names, value types and
 /// limits of the SDK stay inside that one file.
-public protocol AnalyticsProvider {
+public protocol AnalyticsProvider: Sendable {
     func track(_ event: AnalyticsEvent)
     func setUserID(_ id: HashedUserID)
-    func setUserProperties(_ properties: [String: Any])
+    func setUserProperties(_ properties: AnalyticsParameters)
     func reset()
 }

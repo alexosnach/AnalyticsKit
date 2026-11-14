@@ -10,7 +10,7 @@ import Foundation
 /// Today the ID is anonymous, made on the device. When the app gets accounts,
 /// a provider that hashes the backend's ID replaces this one in the
 /// Composition Root; the code that sends the ID does not change.
-public protocol UserIDProvider {
+public protocol UserIDProvider: Sendable {
     func currentUserID() -> HashedUserID
 }
 

@@ -2,16 +2,15 @@
 //  AnalyticsEvent.swift
 //  AnalyticsKit
 //
-//  Created by alex on 10/11/2026.
-//
 
 import Foundation
 
-public struct AnalyticsEvent {
+/// Something that happened in the app: a name and typed parameters.
+public struct AnalyticsEvent: Sendable, Equatable {
     public let name: String
-    public let parameters: [String: Any]
-    
-    public init(name: String, parameters: [String : Any] = [:]) {
+    public let parameters: AnalyticsParameters
+
+    public init(name: String, parameters: AnalyticsParameters = [:]) {
         self.name = name
         self.parameters = parameters
     }

@@ -14,7 +14,7 @@ public struct NoOpAnalytics: AnalyticsService {
     
     public func setUserID(_ id: HashedUserID) {}
     
-    public func setUserProperties(_ properties: [String : Any]) {}
+    public func setUserProperties(_ properties: AnalyticsParameters) {}
     
     public func reset() {}
 }

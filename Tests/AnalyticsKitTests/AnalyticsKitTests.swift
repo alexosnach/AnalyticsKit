@@ -20,7 +20,31 @@ struct AnalyticsEventTests {
     @Test func keepsTheGivenParameters() {
         let event = AnalyticsEvent(name: "paywall_shown", parameters: ["source": "onboarding"])
 
-        #expect(event.parameters["source"] as? String == "onboarding")
+        #expect(event.parameters["source"] == .string("onboarding"))
+    }
+}
+
+@Suite("AnalyticsValue")
+struct AnalyticsValueTests {
+    @Test func literalsBecomeTheMatchingCase() {
+        let parameters: AnalyticsParameters = ["s": "text", "i": 2, "d": 1.5, "b": true]
+
+        #expect(parameters == ["s": .string("text"), "i": .int(2), "d": .double(1.5), "b": .bool(true)])
+    }
+
+    @Test func foundationValueIsThePlainSwiftValue() {
+        #expect(AnalyticsValue.string("text").foundationValue as? String == "text")
+        #expect(AnalyticsValue.int(2).foundationValue as? Int == 2)
+        #expect(AnalyticsValue.double(1.5).foundationValue as? Double == 1.5)
+        #expect(AnalyticsValue.bool(true).foundationValue as? Bool == true)
+    }
+
+    @Test func foundationValuesKeepsEveryKey() {
+        let plain = (["source": "paywall", "step": 3] as AnalyticsParameters).foundationValues
+
+        #expect(plain.count == 2)
+        #expect(plain["source"] as? String == "paywall")
+        #expect(plain["step"] as? Int == 3)
     }
 }
 
@@ -40,13 +64,24 @@ struct CompositeAnalyticsTests {
         analytics.reset()
 
         let expected: [ProviderCall] = [
-            .track(name: "app_opened", parameters: ["n": 1]),
+            .track(AnalyticsEvent(name: "app_opened", parameters: ["n": 1])),
             .setUserID(id.value),
             .setUserProperties(["is_premium": true]),
             .reset,
         ]
         #expect(first.calls == expected)
         #expect(second.calls == expected)
+    }
+
+    @Test func canBeCalledFromAnyThread() async {
+        let spy = SpyAnalyticsProvider()
+        let analytics: AnalyticsService = CompositeAnalytics(providers: [spy])
+
+        await Task.detached {
+            analytics.track(AnalyticsEvent(name: "background_event"))
+        }.value
+
+        #expect(spy.calls == [.track(AnalyticsEvent(name: "background_event"))])
     }
 
     @Test func worksWithNoProviders() {
@@ -63,7 +98,7 @@ struct CompositeAnalyticsTests {
         analytics.track(AnalyticsEvent(name: "purchase", parameters: ["price": 9.99]))
 
         for spy in spies {
-            #expect(spy.calls == [.track(name: "purchase", parameters: ["price": 9.99])])
+            #expect(spy.calls == [.track(AnalyticsEvent(name: "purchase", parameters: ["price": 9.99]))])
         }
     }
 }
@@ -164,15 +199,15 @@ struct AnonymousUserIDProviderTests {
 @Suite("KeychainUserIDStore", .serialized)
 struct KeychainUserIDStoreTests {
     @Test func hasNoIDBeforeTheFirstSave() {
-        var failures: [KeychainUserIDStore.Failure] = []
+        let failures = Locked<[KeychainUserIDStore.Failure]>([])
         let store = KeychainUserIDStore(
             service: "tests.analyticskit.\(UUID().uuidString)",
             account: "user_id",
-            onError: { failures.append($0) }
+            onError: { failure in failures.withValue { $0.append(failure) } }
         )
 
         #expect(store.load() == nil)
-        #expect(failures.isEmpty, "A missing ID is not a failure")
+        #expect(failures.current.isEmpty, "A missing ID is not a failure")
     }
 
     @Test func loadsWhatWasSaved() {

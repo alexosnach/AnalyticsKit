@@ -36,7 +36,7 @@ public struct CompositeAnalytics: AnalyticsService {
         }
     }
 
-    public func setUserProperties(_ properties: [String: Any]) {
+    public func setUserProperties(_ properties: AnalyticsParameters) {
         for provider in providers {
             provider.setUserProperties(properties)
         }
