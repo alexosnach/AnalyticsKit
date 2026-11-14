@@ -32,7 +32,12 @@ final class Locked<Value>: @unchecked Sendable {
 
 /// Records every call, in order.
 final class SpyAnalyticsProvider: AnalyticsProvider {
+    let id: ProviderID
     private let recorded = Locked<[ProviderCall]>([])
+
+    init(id: ProviderID = ProviderID("spy")) {
+        self.id = id
+    }
 
     var calls: [ProviderCall] { recorded.current }
 
