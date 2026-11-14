@@ -11,6 +11,8 @@ public struct NoOpAnalytics: AnalyticsService {
     public init() {}
 
     public func track(_ event: AnalyticsEvent) {}
+
+    public func trackPurchase(_ purchase: Purchase) {}
     
     public func setUserID(_ id: HashedUserID) {}
     

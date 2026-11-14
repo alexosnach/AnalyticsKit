@@ -51,6 +51,26 @@ final class SpyAnalyticsProvider: AnalyticsProvider {
     }
 }
 
+/// A provider whose SDK also records revenue.
+final class SpyRevenueProvider: AnalyticsProvider, RevenueTracking {
+    private let spy: SpyAnalyticsProvider
+    private let purchases = Locked<[Purchase]>([])
+
+    var id: ProviderID { spy.id }
+    var calls: [ProviderCall] { spy.calls }
+    var trackedPurchases: [Purchase] { purchases.current }
+
+    init(id: ProviderID) {
+        self.spy = SpyAnalyticsProvider(id: id)
+    }
+
+    func track(_ event: AnalyticsEvent) { spy.track(event) }
+    func trackPurchase(_ purchase: Purchase) { purchases.withValue { $0.append(purchase) } }
+    func setUserID(_ id: HashedUserID) { spy.setUserID(id) }
+    func setUserProperties(_ properties: AnalyticsParameters) { spy.setUserProperties(properties) }
+    func reset() { spy.reset() }
+}
+
 /// Keeps the ID in memory; can be told to forget every save.
 final class InMemoryUserIDStore: UserIDStore {
     private struct State {
