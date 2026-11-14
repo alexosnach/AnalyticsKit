@@ -18,7 +18,8 @@ public enum AnalyticsValue: Sendable, Hashable {
     case double(Double)
     case bool(Bool)
 
-    /// The plain Swift value, for SDKs whose APIs take `Any`.
+    /// The plain Swift value (`String`, `Int`, `Double` or `Bool`), for
+    /// SDKs whose APIs take `Any`. Use it inside providers only.
     public var foundationValue: any Sendable {
         switch self {
         case .string(let value): value

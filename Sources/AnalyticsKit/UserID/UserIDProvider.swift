@@ -11,6 +11,8 @@ import Foundation
 /// a provider that hashes the backend's ID replaces this one in the
 /// Composition Root; the code that sends the ID does not change.
 public protocol UserIDProvider: Sendable {
+    /// The hashed ID to pass to ``UserIdentification/setUserID(_:)``.
+    /// Call it at launch; it returns the same ID every time.
     func currentUserID() -> HashedUserID
 }
 
@@ -22,11 +24,15 @@ public struct AnonymousUserIDProvider: UserIDProvider {
     private let store: UserIDStore
     private let hasher: IdentifierHasher
 
+    /// - Parameters:
+    ///   - store: Where the raw ID lives; ``KeychainUserIDStore`` in production.
+    ///   - hasher: How it is hashed; ``SHA256IdentifierHasher`` matches the other platforms.
     public init(store: UserIDStore, hasher: IdentifierHasher) {
         self.store = store
         self.hasher = hasher
     }
 
+    /// The saved ID, hashed; on first launch a new lowercase UUID is made and saved.
     public func currentUserID() -> HashedUserID {
         hasher.hash(rawID())
     }

@@ -25,6 +25,11 @@ public struct KeychainUserIDStore: UserIDStore {
     private let account: String
     private let onError: @Sendable (Failure) -> Void
 
+    /// - Parameters:
+    ///   - service: Keychain service; the bundle ID by default.
+    ///   - account: Keychain account; change it only to keep several IDs apart.
+    ///   - onError: Called on any Keychain failure except "not found". Log it;
+    ///     don't show it to the user.
     public init(
         service: String = Bundle.main.bundleIdentifier ?? "app",
         account: String = "analytics.user_id",
@@ -35,6 +40,7 @@ public struct KeychainUserIDStore: UserIDStore {
         self.onError = onError
     }
 
+    /// The saved ID, or `nil` if there is none or reading failed (reported to `onError`).
     public func load() -> String? {
         var query = baseQuery
         query[kSecReturnData as String] = true
@@ -52,6 +58,7 @@ public struct KeychainUserIDStore: UserIDStore {
         return String(data: data, encoding: .utf8)
     }
 
+    /// Updates the saved ID or adds it; failures go to `onError`.
     public func save(_ id: String) {
         let data = Data(id.utf8)
 
