@@ -17,8 +17,9 @@ import Foundation
 ///
 /// To add an analytics system:
 /// 1. Declare its ID: `extension ProviderID { static let mixpanel = ProviderID("mixpanel") }`.
-/// 2. Write a type that adopts `AnalyticsProvider` (and ``RevenueTracking``
-///    if its SDK records revenue).
+/// 2. Write a type that adopts `AnalyticsProvider`; add ``RevenueTracking``
+///    if its SDK records revenue, ``ScreenTracking`` if it has a screen API
+///    (otherwise screens arrive in ``track(_:)`` as `screen_view` events).
 /// 3. Add it to the `CompositeAnalytics` list in the Composition Root.
 ///
 /// Nothing else changes. Methods are called from any thread; if the SDK

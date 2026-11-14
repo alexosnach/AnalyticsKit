@@ -271,6 +271,7 @@ struct NoOpAnalyticsTests {
         let analytics: AnalyticsService = NoOpAnalytics()
 
         analytics.track(AnalyticsEvent(name: "app_opened"))
+        analytics.trackScreen(ScreenView(name: "home"))
         analytics.trackPurchase(Purchase(productID: "p", transactionID: "t", price: 1, currency: "USD"))
         analytics.setUserID(SHA256IdentifierHasher().hash("user"))
         analytics.setUserProperties(["is_premium": true])

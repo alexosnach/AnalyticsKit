@@ -17,6 +17,9 @@ public struct NoOpAnalytics: AnalyticsService {
     public func track(_ event: AnalyticsEvent) {}
 
     /// Does nothing.
+    public func trackScreen(_ screen: ScreenView) {}
+
+    /// Does nothing.
     public func trackPurchase(_ purchase: Purchase) {}
 
     /// Does nothing.

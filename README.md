@@ -70,6 +70,29 @@ analytics.track(AnalyticsEvent(name: "screen_view", destinations: .except([.apps
 
 An ID of a provider that isn't plugged in is simply never matched. User identification (`setUserID`, `setUserProperties`, `reset`) always reaches every provider.
 
+## Screens
+
+SDKs' automatic screen tracking sees hosting classes, not your screens, so report them yourself — once each time a screen becomes visible:
+
+```swift
+analytics.trackScreen(ScreenView(name: "paywall", screenClass: "PaywallView", parameters: ["source": "settings"]))
+```
+
+Adopting `ScreenTracking` in a provider is optional. A provider whose SDK has a screen API adopts it and receives the `ScreenView`; every other provider automatically receives a `screen_view` event with `screen_name` and `screen_class`, so no screen is lost and nothing has to be implemented:
+
+```swift
+extension FirebaseAnalyticsProvider: ScreenTracking {
+    func trackScreen(_ screen: ScreenView) {
+        Analytics.logEvent(AnalyticsEventScreenView, parameters: [
+            AnalyticsParameterScreenName: screen.name,
+            AnalyticsParameterScreenClass: screen.screenClass ?? screen.name,
+        ])
+    }
+}
+```
+
+`destinations` works the same as for events.
+
 ## Revenue
 
 ```swift
@@ -121,7 +144,7 @@ struct PaywallView: View {
 }
 ```
 
-Views get only `EventTracking` (`track`); identifying the user (`UserIdentification`) stays in the Composition Root.
+Views get only `EventTracking & ScreenTracking` (`track`, `trackScreen`); identifying the user and revenue stay out of the UI.
 
 ## Writing a provider
 
@@ -169,8 +192,9 @@ Every public type is `Sendable` and nonisolated, so analytics can be called from
 
 | Type | Purpose |
 |---|---|
-| `AnalyticsService` | `EventTracking & RevenueTracking & UserIdentification` — what the app uses |
+| `AnalyticsService` | `EventTracking & ScreenTracking & RevenueTracking & UserIdentification` — what the app uses |
 | `AnalyticsProvider` | What an SDK adapter implements (with its `id`) |
+| `ScreenTracking`, `ScreenView` | `trackScreen` — optional for providers; others get a `screen_view` event |
 | `RevenueTracking` | `trackPurchase` — adopted by providers whose SDK records revenue |
 | `CompositeAnalytics` | Forwards calls to providers, in order, honouring `destinations` |
 | `NoOpAnalytics` | Does nothing (tests, previews) |

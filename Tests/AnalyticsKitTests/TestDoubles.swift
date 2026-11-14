@@ -71,6 +71,26 @@ final class SpyRevenueProvider: AnalyticsProvider, RevenueTracking {
     func reset() { spy.reset() }
 }
 
+/// A provider whose SDK has its own screen API.
+final class SpyScreenProvider: AnalyticsProvider, ScreenTracking {
+    private let spy: SpyAnalyticsProvider
+    private let screens = Locked<[ScreenView]>([])
+
+    var id: ProviderID { spy.id }
+    var calls: [ProviderCall] { spy.calls }
+    var trackedScreens: [ScreenView] { screens.current }
+
+    init(id: ProviderID) {
+        self.spy = SpyAnalyticsProvider(id: id)
+    }
+
+    func track(_ event: AnalyticsEvent) { spy.track(event) }
+    func trackScreen(_ screen: ScreenView) { screens.withValue { $0.append(screen) } }
+    func setUserID(_ id: HashedUserID) { spy.setUserID(id) }
+    func setUserProperties(_ properties: AnalyticsParameters) { spy.setUserProperties(properties) }
+    func reset() { spy.reset() }
+}
+
 /// Keeps the ID in memory; can be told to forget every save.
 final class InMemoryUserIDStore: UserIDStore {
     private struct State {

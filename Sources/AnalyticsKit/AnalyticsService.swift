@@ -9,9 +9,10 @@ import Foundation
 ///
 /// Build it once in the Composition Root (usually a ``CompositeAnalytics``)
 /// and inject it. Give each caller only the role it needs: a view or view
-/// model that reports events depends on ``EventTracking``, the purchase flow
+/// model that reports events depends on ``EventTracking`` (and
+/// ``ScreenTracking`` if it reports screens), the purchase flow
 /// on ``RevenueTracking``, sign-in/sign-out code on ``UserIdentification``.
-public typealias AnalyticsService = EventTracking & RevenueTracking & UserIdentification
+public typealias AnalyticsService = EventTracking & ScreenTracking & RevenueTracking & UserIdentification
 
 /// Reports what happens in the app.
 public protocol EventTracking: Sendable {
@@ -25,6 +26,27 @@ public protocol EventTracking: Sendable {
     /// analytics.track(AnalyticsEvent(name: "paywall_shown", parameters: ["source": "onboarding"]))
     /// ```
     func track(_ event: AnalyticsEvent)
+}
+
+/// Reports which screens the user opens.
+///
+/// The app calls it on the service. A provider adopts it only when its SDK
+/// has its own screen API (Firebase's `screen_view`, UXCam's screen tags);
+/// every other provider receives ``ScreenView/fallbackEvent`` through
+/// ``EventTracking/track(_:)``, so no provider misses a screen.
+public protocol ScreenTracking: Sendable {
+    /// Records that the user opened a screen.
+    ///
+    /// Call it once each time the screen becomes visible — from SwiftUI's
+    /// `onAppear` or the view model's appear handler — including when the
+    /// user comes back to it. Don't call it for sheets or alerts that aren't
+    /// screens in your funnels, and don't send a separate event for the same
+    /// visit.
+    ///
+    /// ```swift
+    /// analytics.trackScreen(ScreenView(name: "paywall", screenClass: "PaywallView"))
+    /// ```
+    func trackScreen(_ screen: ScreenView)
 }
 
 /// Records revenue.

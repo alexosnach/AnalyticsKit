@@ -24,6 +24,7 @@ import Foundation
 public struct CompositeAnalytics: AnalyticsService {
     private let providers: [AnalyticsProvider]
     private let revenueProviders: [RevenueProvider]
+    private let screenProviders: [ScreenProvider]
 
     /// Builds the service from the providers the app plugs in.
     ///
@@ -33,15 +34,26 @@ public struct CompositeAnalytics: AnalyticsService {
     ///
     /// - Parameter providers: Called in this order. Providers that also adopt
     ///   ``RevenueTracking`` receive purchases; the rest only receive events.
+    ///   Providers that adopt ``ScreenTracking`` receive screens through it;
+    ///   the rest receive them as ``ScreenView/fallbackEvent``.
     public init(providers: [AnalyticsProvider]) {
         self.providers = providers
         self.revenueProviders = providers.compactMap(RevenueProvider.init)
+        self.screenProviders = providers.map(ScreenProvider.init)
     }
 
     /// Forwards the event to every provider its destinations include, in order.
     public func track(_ event: AnalyticsEvent) {
         for provider in providers where event.destinations.includes(provider.id) {
             provider.track(event)
+        }
+    }
+
+    /// Forwards the screen to every provider its destinations include: through
+    /// the provider's own screen API, or as ``ScreenView/fallbackEvent``.
+    public func trackScreen(_ screen: ScreenView) {
+        for provider in screenProviders where screen.destinations.includes(provider.id) {
+            provider.track(screen)
         }
     }
 
@@ -83,5 +95,24 @@ private struct RevenueProvider: Sendable {
         guard let tracker = provider as? RevenueTracking else { return nil }
         self.id = provider.id
         self.tracker = tracker
+    }
+}
+
+/// How one provider receives screens, decided once when the composite is built.
+private struct ScreenProvider: Sendable {
+    let id: ProviderID
+    private let provider: AnalyticsProvider
+
+    init(_ provider: AnalyticsProvider) {
+        self.id = provider.id
+        self.provider = provider
+    }
+
+    func track(_ screen: ScreenView) {
+        if let tracker = provider as? ScreenTracking {
+            tracker.trackScreen(screen)
+        } else {
+            provider.track(screen.fallbackEvent)
+        }
     }
 }
