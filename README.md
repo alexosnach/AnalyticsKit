@@ -15,7 +15,7 @@ Or in `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/alexosnach/AnalyticsKit.git", from: "1.0.0"),
+    .package(url: "https://github.com/alexosnach/AnalyticsKit.git", from: "2.0.0"),
 ],
 targets: [
     .target(name: "MyApp", dependencies: ["AnalyticsKit"]),
